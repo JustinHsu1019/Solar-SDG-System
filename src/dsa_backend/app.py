@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 # 初始化配置
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", "GOOGLE_API_KEY"))
