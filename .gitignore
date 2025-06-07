@@ -195,3 +195,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+dsa_backend/caca
+
+.gitignores
