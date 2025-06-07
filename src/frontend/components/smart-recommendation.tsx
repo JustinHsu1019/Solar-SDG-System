@@ -52,7 +52,7 @@ interface RecommendationResult {
 }
 
 interface SmartRecommendationProps {
-  recommendation?: RecommendationResult[]
+  recommendation?: RecommendationResult[] | null
   onRecommendationSelect?: (recommendation: RecommendationResult) => void
 }
 
