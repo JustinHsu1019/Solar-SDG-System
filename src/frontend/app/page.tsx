@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Sun, Loader2, CheckCircle } from "lucide-react"
+import { FcGoogle } from "react-icons/fc"
 
 export default function HomePage() {
   const router = useRouter()
@@ -25,6 +26,10 @@ export default function HomePage() {
     setTimeout(() => {
       router.push("/calculator")
     }, 2000)
+  }
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://127.0.0.1:8080/login/google"
   }
 
   return (
@@ -66,6 +71,17 @@ export default function HomePage() {
                   ) : (
                     "開始使用"
                   )}
+                </Button>
+                <div className="flex items-center justify-center my-2">
+                  <span className="text-gray-400 text-xs">或</span>
+                </div>
+                <Button
+                  onClick={handleGoogleLogin}
+                  variant="outline"
+                  className="w-full flex items-center justify-center border-gray-300"
+                >
+                  <FcGoogle className="mr-2 h-5 w-5" />
+                  使用 Google 登入
                 </Button>
               </div>
             ) : (

@@ -15,6 +15,8 @@ import ContactForm from "@/components/contact-form"
 import PlanComparison from "@/components/plan-comparison"
 import SmartRecommendation from "@/components/smart-recommendation"
 import SolarMap from "@/components/solar-map"
+const user = JSON.parse(localStorage.getItem("user") || "{}")
+console.log(user.email)
 
 interface SimulationData {
   location: string
@@ -173,7 +175,7 @@ export default function SolarCalculator() {
   const handleRiskTolerance = (field: keyof SimulationData, value: number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
-  
+
   const isFormValid =
     formData.location &&
     formData.roofArea > 0 &&
@@ -290,7 +292,7 @@ export default function SolarCalculator() {
                           ))}
                         </SelectContent>
                       </Select>
-                      </div>
+                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="location" className="flex items-center space-x-2">
@@ -426,7 +428,7 @@ export default function SolarCalculator() {
               savedPlans={savedPlans}
               onDeletePlan={deletePlan}
               onSelectPlan={(plan) => {
-                setFormData({ ...plan.formData, riskTolerance:(plan.formData as SimulationData).riskTolerance || 50 })
+                setFormData({ ...plan.formData, riskTolerance: (plan.formData as SimulationData).riskTolerance || 50 })
                 setResults(plan.results)
                 setActiveTab("results")
               }}
