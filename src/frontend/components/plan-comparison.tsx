@@ -8,6 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart3, Trash2, Eye, MapPin, Home } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 
+interface SimulationData {
+  location_city: string
+  location_dist: string
+  roofArea: number
+  electricityUsage: number
+  roofType: string
+  houseType: string
+  direction: string
+  riskTolerance: number
+  coverage_rate: number
+}
+
 interface Results {
   suitable: boolean
   installationCost: number
@@ -19,14 +31,6 @@ interface Results {
   suitabilityScore: number
 }
 
-interface SimulationData {
-  location: string
-  roofArea: number
-  electricityUsage: number
-  roofType: string
-  direction: string
-}
-
 interface SavedPlan {
   id: string
   name: string
@@ -34,6 +38,7 @@ interface SavedPlan {
   results: Results
   createdAt: Date
 }
+
 
 interface PlanComparisonProps {
   savedPlans: SavedPlan[]
@@ -139,24 +144,32 @@ export default function PlanComparison({ savedPlans, onDeletePlan, onSelectPlan 
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <MapPin className="h-3 w-3" />
-                    <span>{plan.formData.location}</span>
-                    <span>•</span>
-                    <Home className="h-3 w-3" />
-                    <span>{plan.formData.roofArea}m²</span>
-                  </div>
+                  {plan.formData && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <MapPin className="h-3 w-3" />
+                      <span>{plan.formData.location_city}</span>
+                      <span>•</span>
+                      <Home className="h-3 w-3" />
+                      <span>{plan.formData.roofArea}m²</span>
+                    </div>
+                  )}
+
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="text-gray-600">安裝成本</p>
-                      <p className="font-semibold">{formatCurrency(plan.results.installationCost)}</p>
+                  {plan.results && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-600">安裝成本</p>
+                        <p className="font-semibold">{formatCurrency(plan.results.installationCost)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">回本年限</p>
+                        <p className="font-semibold">{plan.results.paybackPeriod} 年</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-gray-600">回本年限</p>
-                      <p className="font-semibold">{plan.results.paybackPeriod} 年</p>
-                    </div>
+                  )}
+
                     <div>
                       <p className="text-gray-600">年節省</p>
                       <p className="font-semibold">{formatCurrency(plan.results.annualSavings)}</p>
@@ -219,7 +232,7 @@ export default function PlanComparison({ savedPlans, onDeletePlan, onSelectPlan 
                           <td className="py-3 px-4 font-medium">地區</td>
                           {getSelectedPlansData().map((plan) => (
                             <td key={plan.id} className="text-center py-3 px-4">
-                              {plan.formData.location}
+                              {plan.formData.location_city}
                             </td>
                           ))}
                         </tr>
