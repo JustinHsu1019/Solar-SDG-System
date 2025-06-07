@@ -1,2 +1,4 @@
 Flask
 rasterio
+authlib
+python-dotenv

@@ -1,0 +1,10 @@
+{
+  "capacity_kw": "roof_area_m2 * coverage_rate * 0.15125",
+  "daily_kwh_per_kw": "city_to_kwh_day.get(address, 2.8)",
+  "annual_generation_kwh": "capacity_kw * daily_kwh_per_kw * 365",
+  "fit_rate_total": "get_fit_rate(capacity_kw, efficiency_level)",
+  "annual_revenue_ntd": "annual_generation_kwh * fit_rate_total",
+  "install_cost_ntd": "capacity_kw * (70000 if efficiency_level in ['高效', '非常高效'] else 50000)",
+  "payback_years": "install_cost_ntd / annual_revenue_ntd",
+  "environmental_benefit": "f'減碳 {annual_generation_kwh * 0.00045:.1f} 噸/年'"
+}

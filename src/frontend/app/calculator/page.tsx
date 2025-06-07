@@ -15,6 +15,8 @@ import ContactForm from "@/components/contact-form"
 import PlanComparison from "@/components/plan-comparison"
 import SmartRecommendation from "@/components/smart-recommendation"
 import SolarMap from "@/components/solar-map"
+const user = JSON.parse(localStorage.getItem("user") || "{}")
+console.log(user.email)
 
 interface SimulationData {
   location_city: string
@@ -325,7 +327,7 @@ export default function SolarCalculator() {
                           ))}
                         </SelectContent>
                       </Select>
-                      </div>
+                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="location_dist" className="flex items-center space-x-2">
