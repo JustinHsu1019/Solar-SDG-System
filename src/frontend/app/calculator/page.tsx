@@ -22,6 +22,10 @@ import ContactForm from "@/components/contact-form"
 import PlanComparison from "@/components/plan-comparison"
 import SmartRecommendation from "@/components/smart-recommendation"
 import SolarMap from "@/components/solar-map"
+import dynamic from "next/dynamic"
+
+// 動態載入 GoogleMap 元件（避免 SSR 問題）
+const GoogleMap = dynamic(() => import("@/components/google-map"), { ssr: false })
 
 interface SimulationData {
   location_city: string
@@ -345,8 +349,35 @@ export default function SolarCalculatorPage() {
                 </CardContent>
               </Card>
 
-              {/* 右側：地圖 */}
-              <SolarMap selectedLocation={`${formData.location_city}${formData.location_dist}`} />
+              {/* 右側：Google Map */}
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Sun className="h-5 w-5" />
+                      <span>位置與太陽能潛力</span>
+                    </CardTitle>
+                    <CardDescription>
+                      在地圖上選擇您的屋頂位置，並查看該地區的太陽能潛力
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div style={{ width: "100%", height: 400 }}>
+                      <GoogleMap
+                        location={formData.location_city}
+                        onLocationSelect={(lat: number, lng: number) => {
+                          // 你可以根據需要將經緯度存進 formData
+                          setFormData((prev) => ({
+                            ...prev,
+                            lat,
+                            lng,
+                          }))
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
