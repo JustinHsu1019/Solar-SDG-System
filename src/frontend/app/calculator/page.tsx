@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
 import { Sun, Home, MapPin, LogOut, User } from "lucide-react"
 import dynamic from "next/dynamic"
+import SmartRecommendation from "@/components/smart-recommendation"
 
 const GoogleMap = dynamic(() => import("@/components/google-map"), { ssr: false })
 
@@ -110,7 +111,41 @@ export default function SolarCalculatorPage() {
       // console.error("Gemini 預估面積失敗", err)
     }
   }
+  const handleInput = async () => {
+    setIsCalculating(true)
+    try {
+      console.log("📊 開始計算投資回報", formData)
+      const response = await fetch("http://localhost:5001/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roof_area_m2: formData.roofArea,
+          coverage_rate: 0.75,
+          orientation: formData.direction,
+          house_type: formData.houseType,
+          roof_type: formData.roofType,
+          address: formData.location_city,
+          electricity_usage_kwh: formData.electricityUsage,
+          risk_tolerance: formData.riskTolerance
+        })
 
+      })
+      console.log("📊 API 請求資料");
+
+      if (!response.ok) throw new Error("API 呼叫失敗")
+      const data = await response.json()
+      setRecommendation(data)
+      sessionStorage.setItem("formData", JSON.stringify(formData))
+      setActiveTab("recommend")
+      setErrorMessage("")
+
+    } catch (err) {
+      console.error("❌ 呼叫推薦系統錯誤", err)
+      setErrorMessage("推薦系統無法連線，請稍後再試。")
+    } finally {
+      setIsCalculating(false)
+    }
+  }
   const isFormValid = formData.location_city && formData.location_dist && formData.roofArea > 0 && formData.electricityUsage > 0 && formData.roofType && formData.direction
 
   return (
@@ -261,6 +296,14 @@ export default function SolarCalculatorPage() {
                       </div>
                     </div>
                   </div>
+                  <Button
+                      onClick={handleInput}
+                      disabled={!isFormValid || isCalculating}
+                      className="w-full bg-[#ff9a6b] hover:bg-[#df7e51]"
+                      size="lg"
+                    >
+                      {isCalculating ? "計算中..." : "開始計算投資回報"}
+                    </Button>
                 </CardContent>
               </Card>
 
@@ -283,10 +326,14 @@ export default function SolarCalculatorPage() {
                         onRoofAreaDetect={handleRoofAreaDetect}
                       />
                     </div>
+                    
                   </CardContent>
                 </Card>
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="recommend" className="space-y-6">
+            {/* <SmartRecommendation recommendation={recommendation} /> */}
           </TabsContent>
         </Tabs>
       </main>
