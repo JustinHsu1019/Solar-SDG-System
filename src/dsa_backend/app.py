@@ -6,7 +6,7 @@ import re
 import google.generativeai as genai
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # 初始化配置
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
@@ -164,4 +164,4 @@ def llm_decision():
     return jsonify(result)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

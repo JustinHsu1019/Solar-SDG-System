@@ -14,7 +14,7 @@ app = Flask(__name__, static_folder="static")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "your-secret-key")
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "dev-secret")
 jwt = JWTManager(app)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Google OAuth 設定（✅ 改用 OpenID Connect 標準方式）
 oauth = OAuth(app)
