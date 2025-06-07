@@ -95,6 +95,23 @@ export default function SolarCalculatorPage() {
       // console.error("Gemini 預估面積失敗", err)
     }
   }
+  const handleInput = async () => {
+    setIsCalculating(true)
+    try {
+      console.log("📊 開始計算投資回報", formData)
+      const response = await fetch("http://localhost:5001/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roof_area_m2: formData.roofArea,
+          coverage_rate: 0.75,
+          orientation: formData.direction,
+          house_type: formData.houseType,
+          roof_type: formData.roofType,
+          address: formData.location_city,
+          electricity_usage_kwh: formData.electricityUsage,
+          risk_tolerance: formData.riskTolerance
+        })
 
   const handleInput = async () => {
     if (!isFormValid) {
@@ -329,6 +346,14 @@ export default function SolarCalculatorPage() {
                       </div>
                     </div>
                   </div>
+                  <Button
+                      onClick={handleInput}
+                      disabled={!isFormValid || isCalculating}
+                      className="w-full bg-[#ff9a6b] hover:bg-[#df7e51]"
+                      size="lg"
+                    >
+                      {isCalculating ? "計算中..." : "開始計算投資回報"}
+                    </Button>
                 </CardContent>
               </Card>
 
@@ -351,6 +376,7 @@ export default function SolarCalculatorPage() {
                         onRoofAreaDetect={handleRoofAreaDetect}
                       />
                     </div>
+                    
                   </CardContent>
                 </Card>
               </div>
