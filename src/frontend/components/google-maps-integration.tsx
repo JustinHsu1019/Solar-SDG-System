@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { google } from "google-maps"
+
 
 interface GoogleMapsIntegrationProps {
   location: string
