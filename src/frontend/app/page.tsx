@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc"
 export default function HomePage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  
   const [isSuccess, setIsSuccess] = useState(false)
 
   const mockUserInput = {
@@ -23,22 +24,23 @@ export default function HomePage() {
 
   const handleLogin = async () => {
     setIsLoading(true)
-
-    // ✅ 模擬登入過程
-    await new Promise((resolve) => setTimeout(resolve, 1500))
     localStorage.setItem("isLoggedIn", "true")
-    localStorage.setItem("user", JSON.stringify({ email: "user@example.com" }))
 
-    setIsSuccess(true)
+    // // ✅ 模擬登入過程
+    // await new Promise((resolve) => setTimeout(resolve, 1500))
+    // localStorage.setItem("isLoggedIn", "true")
+    // localStorage.setItem("user", JSON.stringify({ email: "user@example.com" }))
 
-    // ✅ 模擬將資料送出給後端 API（可以換成真正的 fetch）
-    await fakeSendToBackend(mockUserInput)
+    // setIsSuccess(true)
 
-    // ✅ 儲存輸入資料到 sessionStorage 以便 calculator 使用
-    sessionStorage.setItem("formData", JSON.stringify(mockUserInput))
-    sessionStorage.setItem("startTab", "recommend")
+    // // ✅ 模擬將資料送出給後端 API（可以換成真正的 fetch）
+    // await fakeSendToBackend(mockUserInput)
 
-    // ✅ 動畫後跳轉
+    // // ✅ 儲存輸入資料到 sessionStorage 以便 calculator 使用
+    // sessionStorage.setItem("formData", JSON.stringify(mockUserInput))
+    // sessionStorage.setItem("startTab", "recommend")
+
+    // // ✅ 動畫後跳轉
     setTimeout(() => {
       window.location.href = "/calculator"
     }, 2000)
