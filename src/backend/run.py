@@ -59,48 +59,6 @@ def get_user():
         return jsonify(user)
     return jsonify({"error": "未登入"}), 401
 
-@app.route("/api/solar-data")
-def get_solar_data():
-    try:
-        lat = float(request.args.get("lat", 0))
-        lng = float(request.args.get("lng", 0))
-
-        solar_potential = calculate_solar_potential(lat, lng)
-        average_sunlight = calculate_average_sunlight(lat, lng)
-        temperature = calculate_average_temperature(lat, lng)
-        weather_condition = get_weather_condition(lat, lng)
-
-        return jsonify({
-            "solarPotential": solar_potential,
-            "averageSunlight": average_sunlight,
-            "temperature": temperature,
-            "weatherCondition": weather_condition,
-            "coordinates": [lat, lng],
-        })
-    except Exception as e:
-        print("Error fetching solar data:", e)
-        return jsonify({"error": "Failed to fetch solar data"}), 500
-
-def calculate_solar_potential(lat, lng):
-    latitude_factor = max(0, 100 - abs(lat - 23.5) * 2)
-    longitude_factor = random.uniform(80, 100)
-    return min(100, max(0, (latitude_factor + longitude_factor) / 2))
-
-def calculate_average_sunlight(lat, lng):
-    base_sunlight = 5.5 - abs(lat - 23.5) * 0.1
-    variation = (random.random() - 0.5) * 1.0
-    return max(3.0, min(7.0, base_sunlight + variation))
-
-def calculate_average_temperature(lat, lng):
-    base_temp = 28 - (lat - 22) * 0.5
-    variation = (random.random() - 0.5) * 4
-    return round(max(18, min(35, base_temp + variation)))
-
-def get_weather_condition(lat, lng):
-    conditions = ["晴朗", "多雲", "晴時多雲"]
-    index = random.randint(0, len(conditions) - 1)
-    return conditions[index]
-
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
