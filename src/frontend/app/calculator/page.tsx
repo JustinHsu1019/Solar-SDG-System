@@ -10,21 +10,9 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-
-import {
-  Calculator, Sun, Phone, MapPin, Home,
-  BarChart3, Lightbulb, LogOut, User
-} from "lucide-react"
-import SimulationResults from "@/components/simulation-results"
-import ContactForm from "@/components/contact-form"
-import PlanComparison from "@/components/plan-comparison"
-import SmartRecommendation from "@/components/smart-recommendation"
-import SolarMap from "@/components/solar-map"
+import { Sun, Home, MapPin, LogOut, User } from "lucide-react"
 import dynamic from "next/dynamic"
 
-// 動態載入 GoogleMap 元件（避免 SSR 問題）
 const GoogleMap = dynamic(() => import("@/components/google-map"), { ssr: false })
 
 interface SimulationData {
@@ -38,22 +26,10 @@ interface SimulationData {
   riskTolerance: number
 }
 
-interface Results {
-  suitable: boolean
-  installationCost: number
-  annualGeneration: number
-  annualSavings: number
-  paybackPeriod: number
-  totalProfit: number
-  carbonReduction: number
-  suitabilityScore: number
-}
-
 export default function SolarCalculatorPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("calculator")
   const [user, setUser] = useState<{ email: string } | null>(null)
-  const [recommendation, setRecommendation] = useState<any>(null)
   const [formData, setFormData] = useState<SimulationData>({
     location_city: "",
     location_dist: "",
@@ -64,16 +40,7 @@ export default function SolarCalculatorPage() {
     direction: "",
     riskTolerance: 50,
   })
-  const [results, setResults] = useState<Results | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
-  const [savedPlans, setSavedPlans] = useState<{
-    id: string,
-    name: string,
-    formData: SimulationData,
-    results: Results,
-    createdAt: Date
-  }[]>([])
 
   const taiwanCities = [
     "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
@@ -82,29 +49,12 @@ export default function SolarCalculatorPage() {
     "台東縣", "澎湖縣", "金門縣", "連江縣"
   ]
 
-  const houseTypes = ["獨棟住宅", "聯排別墅", "公寓大廈", "透天厝"]
-
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true"
     const storedUser = localStorage.getItem("user")
-    const storedFormData = sessionStorage.getItem("formData")
-    const startTab = sessionStorage.getItem("startTab")
-
     if (!isLoggedIn) router.push("/")
     else if (storedUser) setUser(JSON.parse(storedUser))
-    if (storedFormData) {
-      try {
-        setFormData(prev => ({ ...prev, ...JSON.parse(storedFormData) }))
-      } catch (err) {
-        console.error("❌ 無法解析儲存的 formData", err)
-      }
-    }
-    if (startTab) setActiveTab(startTab)
   }, [router])
-
-  useEffect(() => {
-    sessionStorage.setItem("startTab", activeTab)
-  }, [activeTab])
 
   const handleLogout = () => {
     localStorage.setItem("isLoggedIn", "false")
@@ -117,56 +67,48 @@ export default function SolarCalculatorPage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleInput = async () => {
-    setIsCalculating(true)
+  // 解析 Google Maps 地址並自動填入縣市與區里
+  const handleMapLocationSelect = (lat: number, lng: number, address?: string) => {
+    if (address) {
+      const cityMatch = address.match(/(台北市|新北市|桃園市|台中市|台南市|高雄市|基隆市|新竹市|嘉義市|新竹縣|苗栗縣|彰化縣|南投縣|雲林縣|嘉義縣|屏東縣|宜蘭縣|花蓮縣|台東縣|澎湖縣|金門縣|連江縣)/)
+      let city = cityMatch ? cityMatch[0] : ""
+      let dist = ""
+      if (city) {
+        const afterCity = address.split(city)[1] || ""
+        dist = afterCity.replace(/^[\s,，]+/, "")
+      }
+      setFormData(prev => ({
+        ...prev,
+        location_city: city || prev.location_city,
+        location_dist: dist || prev.location_dist,
+      }))
+    }
+  }
+
+  // 新增: 處理圈選多邊形後自動呼叫 Gemini 預估面積
+  const handleRoofAreaDetect = async (area: number, polygon?: { lat: number; lng: number }[]) => {
+    if (!polygon || polygon.length < 3) return
     try {
-      console.log("📊 開始計算投資回報", formData)
-      const response = await fetch("http://localhost:5000/api/recommend", {
+      // 呼叫後端 Gemini API
+      const resp = await fetch("http://localhost:8080/api/roof-detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roof_area_m2: formData.roofArea,
-          coverage_rate: 0.75,
-          orientation: formData.direction,
-          house_type: formData.houseType,
-          roof_type: formData.roofType,
-          address: formData.location_city,
-          electricity_usage_kwh: formData.electricityUsage,
-          risk_tolerance: formData.riskTolerance
-        })
-        
+        body: JSON.stringify({ polygon }),
       })
-      console.log("📊 API 請求資料");
-
-      if (!response.ok) throw new Error("API 呼叫失敗")
-      const data = await response.json()
-      setRecommendation(data)
-      sessionStorage.setItem("formData", JSON.stringify(formData))
-      setActiveTab("recommend")
-      setErrorMessage("")
-
+      if (resp.ok) {
+        const data = await resp.json()
+        if (data.area) {
+          setFormData(prev => ({
+            ...prev,
+            roofArea: Number(data.area),
+          }))
+          // 你也可以在這裡顯示 Gemini 回傳的多邊形或其他資訊
+        }
+      }
     } catch (err) {
-      console.error("❌ 呼叫推薦系統錯誤", err)
-      setErrorMessage("推薦系統無法連線，請稍後再試。")
-    } finally {
-      setIsCalculating(false)
+      // 可加上錯誤提示
+      // console.error("Gemini 預估面積失敗", err)
     }
-  }
-
-  const savePlan = (planName: string) => {
-    if (!results) return
-    const newPlan = {
-      id: Date.now().toString(),
-      name: planName,
-      formData: { ...formData },
-      results: { ...results },
-      createdAt: new Date()
-    }
-    setSavedPlans(prev => [...prev, newPlan])
-  }
-
-  const deletePlan = (planId: string) => {
-    setSavedPlans(prev => prev.filter(p => p.id !== planId))
   }
 
   const isFormValid = formData.location_city && formData.location_dist && formData.roofArea > 0 && formData.electricityUsage > 0 && formData.roofType && formData.direction
@@ -193,10 +135,8 @@ export default function SolarCalculatorPage() {
 
       <main className="pt-24 max-w-7xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-3 gap-3 bg-[#fffcf6] p-4 rounded-xl">
+          <TabsList className="grid grid-cols-1 bg-[#fffcf6] p-4 rounded-xl">
             <TabsTrigger value="calculator" className="tab">輸入資訊</TabsTrigger>
-            <TabsTrigger value="recommend" className="tab">智能推薦</TabsTrigger>
-            <TabsTrigger value="compare" className="tab">方案比較</TabsTrigger>
           </TabsList>
 
           <TabsContent value="calculator" className="space-y-6">
@@ -217,13 +157,16 @@ export default function SolarCalculatorPage() {
                         <MapPin className="h-4 w-4" />
                         <span>所在縣/市</span>
                       </Label>
-                      <Select onValueChange={(value) => handleInputChange("location_city", value)}>
-                        <SelectTrigger>
+                      <Select
+                        onValueChange={(value) => handleInputChange("location_city", value)}
+                        value={formData.location_city}
+                      >
+                        <SelectTrigger data-select-city>
                           <SelectValue placeholder="選擇您的所在縣市" />
                         </SelectTrigger>
                         <SelectContent>
                           {taiwanCities.map((city) => (
-                            <SelectItem key={city} value={city}>
+                            <SelectItem key={city} value={city} data-select-city-item>
                               {city}
                             </SelectItem>
                           ))}
@@ -255,40 +198,10 @@ export default function SolarCalculatorPage() {
                         onChange={(e) => handleInputChange("roofArea", Number(e.target.value))}
                       />
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="houseType" className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>房屋類型</span>
-                      </Label>
-                      <Select onValueChange={(value) => handleInputChange("houseType", value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="選擇您的房屋類型" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {houseTypes.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="electricityUsage">月平均用電量 (度)</Label>
-                      <Input
-                        id="electricityUsage"
-                        type="number"
-                        placeholder="例：300"
-                        value={formData.electricityUsage || ""}
-                        onChange={(e) => handleInputChange("electricityUsage", Number(e.target.value))}
-                      />
-                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="roofType">屋頂類型</Label>
-                      <Select onValueChange={(value) => handleInputChange("roofType", value)}>
+                      <Select onValueChange={(value) => handleInputChange("roofType", value)} value={formData.roofType}>
                         <SelectTrigger>
                           <SelectValue placeholder="選擇屋頂類型" />
                         </SelectTrigger>
@@ -303,7 +216,7 @@ export default function SolarCalculatorPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="direction">屋頂主要朝向</Label>
-                      <Select onValueChange={(value) => handleInputChange("direction", value)}>
+                      <Select onValueChange={(value) => handleInputChange("direction", value)} value={formData.direction}>
                         <SelectTrigger>
                           <SelectValue placeholder="選擇屋頂朝向" />
                         </SelectTrigger>
@@ -316,6 +229,17 @@ export default function SolarCalculatorPage() {
                           <SelectItem value="north">正北</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="electricityUsage">月平均用電量 (度)</Label>
+                      <Input
+                        id="electricityUsage"
+                        type="number"
+                        placeholder="例：300"
+                        value={formData.electricityUsage || ""}
+                        onChange={(e) => handleInputChange("electricityUsage", Number(e.target.value))}
+                      />
                     </div>
 
                     <div className="space-y-3">
@@ -337,15 +261,6 @@ export default function SolarCalculatorPage() {
                       </div>
                     </div>
                   </div>
-
-                  <Button
-                    onClick={handleInput}
-                    disabled={!isFormValid || isCalculating}
-                    className="w-full bg-[#ff9a6b] hover:bg-[#df7e51]"
-                    size="lg"
-                  >
-                    {isCalculating ? "計算中..." : "開始計算投資回報"}
-                  </Button>
                 </CardContent>
               </Card>
 
@@ -364,15 +279,8 @@ export default function SolarCalculatorPage() {
                   <CardContent>
                     <div style={{ width: "100%", height: 400 }}>
                       <GoogleMap
-                        location={formData.location_city}
-                        onLocationSelect={(lat: number, lng: number) => {
-                          // 你可以根據需要將經緯度存進 formData
-                          setFormData((prev) => ({
-                            ...prev,
-                            lat,
-                            lng,
-                          }))
-                        }}
+                        onLocationSelect={handleMapLocationSelect}
+                        onRoofAreaDetect={handleRoofAreaDetect}
                       />
                     </div>
                   </CardContent>
@@ -380,15 +288,6 @@ export default function SolarCalculatorPage() {
               </div>
             </div>
           </TabsContent>
-
-          <TabsContent value="recommend">
-            <SmartRecommendation recommendation={recommendation} />
-            {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
-          </TabsContent>
-
-          {/* <TabsContent value="compare">
-            <PlanComparison savedPlans={savedPlans} onDeletePlan={deletePlan} />
-          </TabsContent> */}
         </Tabs>
       </main>
     </div>
