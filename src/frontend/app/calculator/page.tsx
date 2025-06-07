@@ -184,10 +184,33 @@ export default function SolarCalculatorPage() {
     }
   }
 
-  const handleInput = async () => {
-    if (!isFormValid) {
-      setErrorMessage("請完整填寫所有欄位")
-      return
+  setIsCalculating(true)
+  setErrorMessage("")
+
+  try {
+    console.log("📊 開始計算投資回報", formData)
+
+    const response = await fetch(`http://localhost:5001/api/recommend`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roof_area_m2: formData.roofArea,
+        coverage_rate: formData.coverage_rate,
+        orientation: formData.direction,
+        house_type: formData.houseType,
+        roof_type: formData.roofType,
+        address: formData.location_city,
+        electricity_usage_kwh: formData.electricityUsage,
+        risk_tolerance: formData.riskTolerance,
+      }),
+    })
+
+    if (!response.ok) throw new Error(`API 回傳失敗：${response.status}`)
+
+    const data = await response.json()
+
+    if (!Array.isArray(data.recommendations)) {
+      throw new Error("API 回傳格式錯誤：找不到 recommendations 陣列")
     }
 
     setIsCalculating(true)
