@@ -18,7 +18,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-TW">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=drawing,geometry`}
+          async
+          defer
+        ></script>
+      </head>
+      <body>
+        {children}
+      </body>
     </html>
   )
 }

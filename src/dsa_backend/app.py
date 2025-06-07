@@ -3,13 +3,16 @@ from flask_cors import CORS
 import json
 import os
 import re
+from dotenv import load_dotenv
 import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # 初始化配置
-genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", "GOOGLE_API_KEY"))
+
+load_dotenv()
 
 with open("solar_config/modules.json", encoding="utf-8") as f:
     modules = json.load(f)
