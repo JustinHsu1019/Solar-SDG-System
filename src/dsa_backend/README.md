@@ -27,7 +27,7 @@ export OPENAI_API_KEY=your_openai_api_key
 python app.py
 ```
 
-伺服器將在 `http://localhost:5000` 運行。
+伺服器將在 `http://localhost:5001` 運行。
 
 ---
 
@@ -79,7 +79,7 @@ python app.py
 ### 🧪 測試範例 `curl`
 
 ```bash
-curl -X POST http://localhost:5000/api/recommend \
+curl -X POST http://localhost:5001/api/recommend \
   -H "Content-Type: application/json" \
   -d '{
     "roof_area_m2": 100,
@@ -132,7 +132,7 @@ curl -X POST http://localhost:5000/api/recommend \
 ### 🧪 測試範例 `curl`
 
 ```bash
-curl -X POST http://localhost:5000/api/llm_decision \
+curl -X POST http://localhost:5001/api/llm_decision \
   -H "Content-Type: application/json" \
   -d '{
     "module_name": "DBK420HFA",
