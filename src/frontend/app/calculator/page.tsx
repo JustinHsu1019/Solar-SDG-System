@@ -90,8 +90,8 @@ export default function SolarCalculatorPage() {
   const handleRoofAreaDetect = async (area: number, polygon?: { lat: number; lng: number }[]) => {
     if (!polygon || polygon.length < 3) return
     try {
-      // 呼叫後端 Gemini API
-      const resp = await fetch("http://localhost:8080/api/roof-detect", {
+      console.log("📊 開始計算投資回報", formData)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ polygon }),
