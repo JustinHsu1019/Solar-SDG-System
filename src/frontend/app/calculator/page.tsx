@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
 import { Sun, Home, MapPin, LogOut, User } from "lucide-react"
 import dynamic from "next/dynamic"
+import SmartRecommendation from "@/components/smart-recommendation"
 
 const GoogleMap = dynamic(() => import("@/components/google-map"), { ssr: false })
 
@@ -41,6 +42,8 @@ export default function SolarCalculatorPage() {
     riskTolerance: 50,
   })
   const [isCalculating, setIsCalculating] = useState(false)
+  const [recommendation, setRecommendation] = useState<any[]>([])
+  const [errorMessage, setErrorMessage] = useState<string>("")
 
   const taiwanCities = [
     "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
@@ -67,36 +70,18 @@ export default function SolarCalculatorPage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  // 解析 Google Maps 地址並自動填入縣市與區里
-  const handleMapLocationSelect = (lat: number, lng: number, address?: string) => {
-    if (address) {
-      const cityMatch = address.match(/(台北市|新北市|桃園市|台中市|台南市|高雄市|基隆市|新竹市|嘉義市|新竹縣|苗栗縣|彰化縣|南投縣|雲林縣|嘉義縣|屏東縣|宜蘭縣|花蓮縣|台東縣|澎湖縣|金門縣|連江縣)/)
-      let city = cityMatch ? cityMatch[0] : ""
-      let dist = ""
-      if (city) {
-        const afterCity = address.split(city)[1] || ""
-        dist = afterCity.replace(/^[\s,，]+/, "")
-      }
-      setFormData(prev => ({
-        ...prev,
-        location_city: city || prev.location_city,
-        location_dist: dist || prev.location_dist,
-      }))
-    }
-  }
-
   // 新增: 處理圈選多邊形後自動呼叫 Gemini 預估面積
   const handleRoofAreaDetect = async (area: number, polygon?: { lat: number; lng: number }[]) => {
     if (!polygon || polygon.length < 3) return
     try {
       console.log("📊 開始計算投資回報", formData)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/recommend`, {
+      const response = await fetch(`http://localhost:8080/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ polygon }),
       })
-      if (resp.ok) {
-        const data = await resp.json()
+      if (response.ok) {
+        const data = await response.json()
         if (data.area) {
           setFormData(prev => ({
             ...prev,
@@ -108,6 +93,89 @@ export default function SolarCalculatorPage() {
     } catch (err) {
       // 可加上錯誤提示
       // console.error("Gemini 預估面積失敗", err)
+    }
+  }
+
+  const handleInput = async () => {
+    if (!isFormValid) {
+      setErrorMessage("請完整填寫所有欄位")
+      return
+    }
+    setIsCalculating(true)
+    setErrorMessage("")
+    try {
+      console.log("📊 開始計算投資回報", formData)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/recommend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roof_area_m2: formData.roofArea,
+          coverage_rate: 0.75,
+          orientation: formData.direction,
+          house_type: formData.houseType,
+          roof_type: formData.roofType,
+          address: formData.location_city,
+          electricity_usage_kwh: formData.electricityUsage,
+          risk_tolerance: formData.riskTolerance
+        })
+        
+      })
+
+      if (!response.ok) throw new Error(`API 回傳失敗：${response.status}`)
+
+        const data = await response.json()
+    
+        if (!Array.isArray(data.recommendations)) {
+          throw new Error("API 回傳格式錯誤：找不到 recommendations 陣列")
+        }
+    
+        // 🧠 將 API 格式轉換為前端需要的 RecommendationResult[]
+        const converted = data.recommendations.map((item: any, index: number) => ({
+          id: `rec-${index}`,
+          name: item.brand,
+          description: `容量 ${item.capacity_kw}kW，每年約可發電 ${item.annual_generation_kwh} 度`,
+          formData: {
+            location_city: formData.location_city,
+            roofArea: formData.roofArea,
+            electricityUsage: formData.electricityUsage,
+            roofType: formData.roofType,
+            direction: formData.direction,
+          },
+          results: {
+            suitable: true,
+            installationCost: 20000 + index * 1500, // 模擬安裝費用
+            annualGeneration: item.annual_generation_kwh,
+            annualSavings: item.annual_revenue_ntd,
+            paybackPeriod: (20000 + index * 1500) / (item.annual_revenue_ntd || 1), // 回本年限 = 成本 / 年收益
+            totalProfit: item.annual_revenue_ntd * 20,
+            carbonReduction: item.annual_generation_kwh * 0.5,
+            suitabilityScore: 80 + (index % 15),
+          },
+          matchScore: 80 + (index % 15),
+          pros: ["品牌可靠", "效能穩定"],
+          cons: index % 3 === 0 ? ["初期費用略高"] : [],
+          recommendation: "根據您的條件，我們建議採用此方案以獲得穩定報酬。",
+        }))
+    
+        setRecommendation(converted)
+        sessionStorage.setItem("formData", JSON.stringify(formData))
+        setActiveTab("recommend")
+      } catch (err: any) {
+        console.error("❌ 呼叫推薦系統錯誤", err)
+        setErrorMessage(err.message || "推薦系統無法連線，請稍後再試。")
+      } finally {
+        setIsCalculating(false)
+      }
+    }
+
+  const savePlan = (planName: string) => {
+    if (!recommendation || recommendation.length === 0) return
+    const newPlan = {
+      id: Date.now().toString(),
+      name: planName,
+      formData: { ...formData },
+      results: recommendation[0]?.results || {},
+      createdAt: new Date()
     }
   }
 
@@ -279,7 +347,7 @@ export default function SolarCalculatorPage() {
                   <CardContent>
                     <div style={{ width: "100%", height: 400 }}>
                       <GoogleMap
-                        onLocationSelect={handleMapLocationSelect}
+                        onLocationSelect={(location) => console.log("Selected location:", location)}
                         onRoofAreaDetect={handleRoofAreaDetect}
                       />
                     </div>
@@ -287,6 +355,10 @@ export default function SolarCalculatorPage() {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="recommend">
+            <SmartRecommendation recommendation={recommendation} />
+            {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
           </TabsContent>
         </Tabs>
       </main>
