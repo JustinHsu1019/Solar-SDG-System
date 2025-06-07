@@ -1,4 +1,9 @@
-Flask
-rasterio
-authlib
+flask==3.0.0
+openai==0.28.0
+requests
+Werkzeug
+Flask-Cors
+google-generativeai
 python-dotenv
+flask-jwt-extended
+authlib

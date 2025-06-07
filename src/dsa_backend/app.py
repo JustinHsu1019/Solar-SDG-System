@@ -1,55 +1,47 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import json
-import openai
 import os
 import re
+import google.generativeai as genai
 
 app = Flask(__name__)
+CORS(app)
+
+# 初始化配置
+genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
 with open("solar_config/modules.json", encoding="utf-8") as f:
     modules = json.load(f)
-
 with open("solar_config/formulas.json", encoding="utf-8") as f:
     formulas = json.load(f)
-
 with open("solar_config/city_to_kwh_day.json", encoding="utf-8") as f:
     city_to_kwh_day = json.load(f)
-
 with open("solar_config/fit_rate_table.json", encoding="utf-8") as f:
     fit_rate_table = json.load(f)
-
 with open("solar_config/region_bonus.json", encoding="utf-8") as f:
     region_bonus = json.load(f)
-
-openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 def get_fit_rate(capacity_kw, efficiency_level, city):
     base_rate = None
     for tier in fit_rate_table:
         max_kw = tier["max_kw"] if tier["max_kw"] is not None else float("inf")
         if tier["min_kw"] <= capacity_kw < max_kw:
-            # 對四種等級進行分類
             if efficiency_level in ["非常高效", "高效"]:
                 base_rate = tier["high_eff"]
-            else:  # 包含 "一般效率", "低效率"
+            else:
                 base_rate = tier["standard"]
             break
-
-    # 預設值防呆（萬一容量不落在任一區間）
     if base_rate is None:
         base_rate = 3.5
-
-    # 地區加成
     bonus_ratio = region_bonus.get(city, 0)
     return round(base_rate * (1 + bonus_ratio), 4)
 
-# 智能解析 LLM 回應為 JSON
+# JSON 解析工具
 def parse_llm_output(text):
     try:
-        # 嘗試直接 json 解析
         return json.loads(text)
     except:
-        # 嘗試從 code block 中提取 json
         match = re.search(r'```json\\n(.*?)```', text, re.DOTALL)
         if match:
             try:
@@ -70,6 +62,7 @@ def parse_llm_output(text):
                 pass
     return {"final_recommendation": "", "score": 0, "explanation_text": "解析失敗"}
 
+# 呼叫 Gemini 產生建議
 def generate_llm_outputs(summary):
     prompt = f"""
 你是一位太陽能投資顧問。以下是客戶的模擬數據摘要：
@@ -88,12 +81,9 @@ def generate_llm_outputs(summary):
   "explanation_text": "..."
 }}
 """
-    response = openai.ChatCompletion.create(
-        model="gpt-4o",
-        temperature=0.3,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return parse_llm_output(response.choices[0].message.content)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = model.generate_content(prompt)
+    return parse_llm_output(response.text)
 
 @app.route("/api/recommend", methods=["POST"])
 def recommend():
