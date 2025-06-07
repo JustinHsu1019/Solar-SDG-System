@@ -13,16 +13,17 @@ CORS(app)
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", "GOOGLE_API_KEY"))
 
 load_dotenv()
-
-with open("solar_config/modules.json", encoding="utf-8") as f:
+base_dir = os.path.dirname(__file__)  # 指向 src/dsa_backend
+config_path = os.path.join(base_dir, "solar_config")
+with open(os.path.join(config_path, "modules.json"), encoding="utf-8") as f:
     modules = json.load(f)
-with open("solar_config/formulas.json", encoding="utf-8") as f:
+with open(os.path.join(config_path, "formulas.json"), encoding="utf-8") as f:
     formulas = json.load(f)
-with open("solar_config/city_to_kwh_day.json", encoding="utf-8") as f:
+with open(os.path.join(config_path, "city_to_kwh_day.json"), encoding="utf-8") as f:
     city_to_kwh_day = json.load(f)
-with open("solar_config/fit_rate_table.json", encoding="utf-8") as f:
+with open(os.path.join(config_path, "fit_rate_table.json"), encoding="utf-8") as f:
     fit_rate_table = json.load(f)
-with open("solar_config/region_bonus.json", encoding="utf-8") as f:
+with open(os.path.join(config_path, "region_bonus.json"), encoding="utf-8") as f:
     region_bonus = json.load(f)
 
 def get_fit_rate(capacity_kw, efficiency_level, city):

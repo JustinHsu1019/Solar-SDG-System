@@ -1,6 +1,11 @@
 "use client"
 import { useRef, useEffect, useState } from "react"
 
+declare global {
+  interface Window {
+    google: any
+  }
+}
 interface GoogleMapProps {
   location?: string
   onLocationSelect?: (lat: number, lng: number, address?: string) => void
