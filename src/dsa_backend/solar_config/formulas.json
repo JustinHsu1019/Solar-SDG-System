@@ -1,5 +1,5 @@
 {
-  "capacity_kw": "capacity_kw = roof_area_m2 * coverage_rate * (efficiency_percent / 100)",
+  "capacity_kw": "roof_area_m2 * coverage_rate * (efficiency_percent / 100)",
   "daily_kwh_per_kw": "city_to_kwh_day.get(address, 2.8)",
   "annual_generation_kwh": "capacity_kw * daily_kwh_per_kw * 365",
   "fit_rate_total": "get_fit_rate(capacity_kw, efficiency_level)",
