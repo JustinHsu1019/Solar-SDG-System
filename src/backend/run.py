@@ -51,7 +51,7 @@ def authorize_google():
             return "登入失敗，缺少 email", 400
 
         # 把 email 傳回前端，讓前端直接用
-        return redirect(f"http://localhost:3000/oauth-callback?email={email}")
+        return redirect(f"https://solarlytics.ddns.net/oauth-callback?email={email}")
     except Exception as e:
         print("Google OAuth Error:", e)
         return "Google OAuth 登入失敗：" + str(e), 500
