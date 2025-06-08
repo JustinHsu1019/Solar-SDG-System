@@ -57,20 +57,21 @@ export default function HomePage() {
         <div className="relative z-10 max-w-md w-full space-y-8">
           <div className="text-center space-y-4">
             <div className="flex justify-center">
-              <div className="bg-gradient-to-r from-orange-500 to-yellow-500 p-4 rounded-2xl shadow-lg">
-                <Sun className="h-12 w-12 text-white" />
-              </div>
+              
+              <img src="/logo.png" alt="logo" className="h-25 w-25" />
+
+
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">太陽能板平台</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">陽光下的智慧決策</h1>
             <p className="text-lg text-gray-600">SDG 7 - 可負擔與潔淨能源</p>
-            <p className="text-sm text-gray-500 mt-2">智能評估您的太陽能投資回報</p>
+            <p className="text-sm text-gray-500 mt-2">Smarter Solar Starts Here!</p>
           </div>
 
           {/* 登入區域 */}
           <div className="space-y-6">
             {!isSuccess ? (
               <div className="text-center space-y-4">
-                <p className="text-gray-600">開始計算您的太陽能投資效益</p>
+                <p className="text-gray-600">開始計算您的太陽能投資效益!</p>
                 <Button
                   onClick={handleLogin}
                   disabled={isLoading}
@@ -118,10 +119,6 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="text-center text-xs text-gray-500 space-y-1">
-            <p>© 2025 太陽能板平台</p>
-            <p>專業的太陽能投資評估工具</p>
-          </div>
         </div>
       </div>
 
@@ -136,27 +133,9 @@ export default function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-black/10 to-black/30"></div>
         <div className="absolute bottom-8 left-8 text-white space-y-2">
-          <h2 className="text-2xl font-bold">綠色能源，智慧投資</h2>
-          <p className="text-lg opacity-90">讓太陽為您創造持續收益</p>
+          <h2 className="text-2xl font-bold">Google Cloud/ 第三組</h2>
         </div>
-        <div className="absolute top-8 right-8 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-          <div className="text-center space-y-1">
-            <p className="text-xs text-gray-600">平均年節省</p>
-            <p className="text-lg font-bold text-green-600">$45,000</p>
-          </div>
-        </div>
-        <div className="absolute top-32 right-16 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-          <div className="text-center space-y-1">
-            <p className="text-xs text-gray-600">回本年限</p>
-            <p className="text-lg font-bold text-orange-600">7-10年</p>
-          </div>
-        </div>
-        <div className="absolute bottom-32 right-8 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-          <div className="text-center space-y-1">
-            <p className="text-xs text-gray-600">年減碳量</p>
-            <p className="text-lg font-bold text-blue-600">4.5噸 CO₂</p>
-          </div>
-        </div>
+        
       </div>
 
       {/* 全屏載入動畫 */}

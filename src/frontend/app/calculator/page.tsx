@@ -184,33 +184,10 @@ export default function SolarCalculatorPage() {
     }
   }
 
-  setIsCalculating(true)
-  setErrorMessage("")
-
-  try {
-    console.log("📊 開始計算投資回報", formData)
-
-    const response = await fetch(`http://localhost:5001/api/recommend`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roof_area_m2: formData.roofArea,
-        coverage_rate: formData.coverage_rate,
-        orientation: formData.direction,
-        house_type: formData.houseType,
-        roof_type: formData.roofType,
-        address: formData.location_city,
-        electricity_usage_kwh: formData.electricityUsage,
-        risk_tolerance: formData.riskTolerance,
-      }),
-    })
-
-    if (!response.ok) throw new Error(`API 回傳失敗：${response.status}`)
-
-    const data = await response.json()
-
-    if (!Array.isArray(data.recommendations)) {
-      throw new Error("API 回傳格式錯誤：找不到 recommendations 陣列")
+  const handleInput = async () => {
+    if (!isFormValid) {
+      setErrorMessage("請完整填寫所有欄位")
+      return
     }
 
     setIsCalculating(true)
@@ -320,10 +297,9 @@ export default function SolarCalculatorPage() {
       <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="bg-[#ffb875] p-2 rounded-lg">
-              <Sun className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">太陽能投資計算器</h1>
+            <img src="/logo.png" alt="太陽圖示" className="h-12 w-12" />
+
+            <h1 className="text-2xl font-bold text-gray-900">陽光下的智慧決策</h1>
           </div>
           <div className="flex items-center space-x-4">
             {user && (
@@ -364,13 +340,13 @@ export default function SolarCalculatorPage() {
               <span className="font-semibold">智能推薦</span>
             </TabsTrigger>
 
-            <TabsTrigger
+            {/* <TabsTrigger
               value="compare"
               className="flex-1 min-w-[160px] flex flex-col items-center justify-center border rounded-lg px-4 py-3 transition-all duration-200 hover:bg-white hover:shadow-sm data-[state=active]:bg-white data-[state=active]:border-orange-500 data-[state=active]:shadow-lg data-[state=active]:text-orange-600"
             >
               <BarChart3 className="h-5 w-5 mb-1" />
               <span className="font-semibold">方案比較</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="calculator" className="space-y-6">
@@ -561,13 +537,13 @@ export default function SolarCalculatorPage() {
             <SmartRecommendation onSavePlan={savePlan} />
           </TabsContent>
 
-          <TabsContent value="compare">
+          {/* <TabsContent value="compare">
             <PlanComparison 
               savedPlans={savedPlans} 
               onDeletePlan={handleDeletePlan}
               onSelectPlan={handleSelectPlan}
             />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </main>
     </div>
