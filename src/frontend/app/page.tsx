@@ -47,7 +47,7 @@ export default function HomePage() {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/login/google"
+    window.location.href = "/login/google"
   }
 
   return (
