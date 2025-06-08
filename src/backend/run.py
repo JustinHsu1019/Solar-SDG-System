@@ -35,7 +35,7 @@ oauth.register(
 def login_google():
     # 1. 觸發 Google OAuth 流程，使用者授權後會回到 /login/google/authorize
     # 請確保下列兩個 redirect_uri 都有加到 Google Cloud Console 的 OAuth 2.0 設定中：
-    # http://localhost:8080/login/google/authorize
+    # http://34.81.110.126:8080/login/google/authorize
     # http://127.0.0.1:8080/login/google/authorize
     redirect_uri = url_for("authorize_google", _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
@@ -51,7 +51,7 @@ def authorize_google():
             return "登入失敗，缺少 email", 400
 
         # 把 email 傳回前端，讓前端直接用
-        return redirect(f"http://localhost:3000/oauth-callback?email={email}")
+        return redirect(f"https://solarlytics.ddns.net/oauth-callback?email={email}")
     except Exception as e:
         print("Google OAuth Error:", e)
         return "Google OAuth 登入失敗：" + str(e), 500
