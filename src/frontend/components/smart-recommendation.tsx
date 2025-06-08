@@ -244,7 +244,7 @@ export default function SmartRecommendation({ onRecommendationSelect, onSavePlan
 
               <Button
                 onClick={async () => {
-                  const response = await fetch("http://34.81.110.126:5001/api/llm_decision", {
+                  const response = await fetch("/api/llm_decision", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({

@@ -1,0 +1,3 @@
+- 問題 1: OAuth 封鎖、重新導向
+- 問題 2: Google Vertex AI API "region" 被鎖
+- 問題 3: https to http 後端連線不通

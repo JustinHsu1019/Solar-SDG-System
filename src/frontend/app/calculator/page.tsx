@@ -164,7 +164,7 @@ export default function SolarCalculatorPage() {
     if (!polygon || polygon.length < 3) return
     
     try {
-      const response = await fetch("http://34.81.110.126:8080/api/roof-detect", {
+      const response = await fetch("/api/roof-detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ polygon }),
@@ -196,7 +196,7 @@ export default function SolarCalculatorPage() {
     try {
       console.log("📊 開始計算投資回報", formData)
   
-      const response = await fetch(`http://34.81.110.126:5001/api/recommend`, {
+      const response = await fetch(`/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
