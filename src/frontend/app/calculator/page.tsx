@@ -184,42 +184,13 @@ export default function SolarCalculatorPage() {
     }
   }
 
-  setIsCalculating(true)
-  setErrorMessage("")
-
-  try {
-    console.log("📊 開始計算投資回報", formData)
-
-    const response = await fetch(`http://localhost:5001/api/recommend`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roof_area_m2: formData.roofArea,
-        coverage_rate: formData.coverage_rate,
-        orientation: formData.direction,
-        house_type: formData.houseType,
-        roof_type: formData.roofType,
-        address: formData.location_city,
-        electricity_usage_kwh: formData.electricityUsage,
-        risk_tolerance: formData.riskTolerance,
-      }),
-    })
-
-    if (!response.ok) throw new Error(`API 回傳失敗：${response.status}`)
-
-    const data = await response.json()
-
-    if (!Array.isArray(data.recommendations)) {
-      throw new Error("API 回傳格式錯誤：找不到 recommendations 陣列")
-    }
-
+  const handleInput = async () => {
     setIsCalculating(true)
     setErrorMessage("")
-
+  
     try {
-      localStorage.setItem("formData", JSON.stringify(formData))
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080"
+      console.log("📊 開始計算投資回報", formData)
+  
       const response = await fetch(`http://localhost:5001/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -234,16 +205,17 @@ export default function SolarCalculatorPage() {
           risk_tolerance: formData.riskTolerance,
         }),
       })
-
+  
       if (!response.ok) {
         throw new Error(`API 回傳失敗：${response.status}`)
       }
-      
+  
       const data = await response.json()
       if (!Array.isArray(data.recommendations)) {
         throw new Error("API 回傳格式錯誤")
       }
-
+  
+      localStorage.setItem("formData", JSON.stringify(formData))
       localStorage.setItem("data", JSON.stringify(data))
       setActiveTab("recommend")
     } catch (err: any) {
@@ -252,7 +224,7 @@ export default function SolarCalculatorPage() {
     } finally {
       setIsCalculating(false)
     }
-  }
+  }  
 
   const savePlan = (planName: string) => {
     if (!results || !formData || !planName.trim()) {
