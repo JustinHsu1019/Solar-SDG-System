@@ -340,13 +340,13 @@ export default function SolarCalculatorPage() {
               <span className="font-semibold">智能推薦</span>
             </TabsTrigger>
 
-            {/* <TabsTrigger
+            <TabsTrigger
               value="compare"
               className="flex-1 min-w-[160px] flex flex-col items-center justify-center border rounded-lg px-4 py-3 transition-all duration-200 hover:bg-white hover:shadow-sm data-[state=active]:bg-white data-[state=active]:border-orange-500 data-[state=active]:shadow-lg data-[state=active]:text-orange-600"
             >
               <BarChart3 className="h-5 w-5 mb-1" />
               <span className="font-semibold">方案比較</span>
-            </TabsTrigger> */}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="calculator" className="space-y-6">
@@ -537,13 +537,13 @@ export default function SolarCalculatorPage() {
             <SmartRecommendation onSavePlan={savePlan} />
           </TabsContent>
 
-          {/* <TabsContent value="compare">
+          <TabsContent value="compare">
             <PlanComparison 
-              savedPlans={savedPlans} 
-              onDeletePlan={handleDeletePlan}
-              onSelectPlan={handleSelectPlan}
+              // savedPlans={ } 
+              // onDeletePlan={ }
+              // onSelectPlan={ }
             />
-          </TabsContent> */}
+          </TabsContent>
         </Tabs>
       </main>
     </div>
