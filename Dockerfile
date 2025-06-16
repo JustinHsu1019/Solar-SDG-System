@@ -2,7 +2,9 @@
 FROM node:18-bullseye
 
 # 安裝 Python 與依賴
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3=3.9.2-3 python3-pip=20.3.4-4+deb11u1 \
+ && rm -rf /var/lib/apt/lists/*
 
 # 設定工作目錄
 WORKDIR /app
@@ -12,7 +14,7 @@ COPY . .
 
 # 安裝 pnpm 與前端依賴
 WORKDIR /app/src/frontend
-RUN npm install -g pnpm concurrently \
+RUN npm install -g pnpm@8.15.4 concurrently@8.2.2 \
  && pnpm install \
  && pnpm build
 
