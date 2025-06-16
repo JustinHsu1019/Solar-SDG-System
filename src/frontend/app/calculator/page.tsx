@@ -96,21 +96,21 @@ export default function SolarCalculatorPage() {
   const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([])
 
   const taiwanCities = [
-    "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市", 
-    "基隆市", "新竹市", "嘉義市", "新竹縣", "苗栗縣", "彰化縣", 
-    "南投縣", "雲林縣", "嘉義縣", "屏東縣", "宜蘭縣", "花蓮縣", 
+    "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
+    "基隆市", "新竹市", "嘉義市", "新竹縣", "苗栗縣", "彰化縣",
+    "南投縣", "雲林縣", "嘉義縣", "屏東縣", "宜蘭縣", "花蓮縣",
     "台東縣", "澎湖縣", "金門縣", "連江縣"
   ]
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true"
     const storedUser = localStorage.getItem("user")
-    
+
     if (!isLoggedIn) {
       router.push("/")
       return
     }
-    
+
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser))
@@ -125,9 +125,9 @@ export default function SolarCalculatorPage() {
     // Load saved plans
     try {
       const stored = JSON.parse(localStorage.getItem("savedPlans") || "[]") as SavedPlan[]
-      const parsed = stored.map(p => ({ 
-        ...p, 
-        createdAt: new Date(p.createdAt) 
+      const parsed = stored.map(p => ({
+        ...p,
+        createdAt: new Date(p.createdAt)
       }))
       setSavedPlans(parsed)
     } catch (error) {
@@ -151,7 +151,7 @@ export default function SolarCalculatorPage() {
       const cityMatch = address.match(/(台北市|新北市|桃園市|台中市|台南市|高雄市|基隆市|新竹市|嘉義市|新竹縣|苗栗縣|彰化縣|南投縣|雲林縣|嘉義縣|屏東縣|宜蘭縣|花蓮縣|台東縣|澎湖縣|金門縣|連江縣)/)
       const city = cityMatch?.[0] ?? ""
       const dist = city ? (address.split(city)[1] || "").replace(/^[\s,，]+/, "") : ""
-      
+
       setFormData(prev => ({
         ...prev,
         location_city: city || prev.location_city,
@@ -162,18 +162,18 @@ export default function SolarCalculatorPage() {
 
   const handleRoofAreaDetect = async (area: number, polygon?: { lat: number; lng: number }[]) => {
     if (!polygon || polygon.length < 3) return
-    
+
     try {
       const response = await fetch("/api/roof-detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ polygon }),
       })
-      
+
       if (!response.ok) {
         throw new Error(`Roof detection failed: ${response.status}`)
       }
-      
+
       const data = await response.json()
       if (data.area) {
         setFormData(prev => ({ ...prev, roofArea: Number(data.area) }))
@@ -192,10 +192,10 @@ export default function SolarCalculatorPage() {
 
     setIsCalculating(true)
     setErrorMessage("")
-  
+
     try {
       console.log("📊 開始計算投資回報", formData)
-  
+
       const response = await fetch(`/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -210,16 +210,16 @@ export default function SolarCalculatorPage() {
           risk_tolerance: formData.riskTolerance,
         }),
       })
-  
+
       if (!response.ok) {
         throw new Error(`API 回傳失敗：${response.status}`)
       }
-  
+
       const data = await response.json()
       if (!Array.isArray(data.recommendations)) {
         throw new Error("API 回傳格式錯誤")
       }
-  
+
       localStorage.setItem("formData", JSON.stringify(formData))
       localStorage.setItem("data", JSON.stringify(data))
       setActiveTab("recommend")
@@ -229,7 +229,7 @@ export default function SolarCalculatorPage() {
     } finally {
       setIsCalculating(false)
     }
-  }  
+  }
 
   const savePlan = (planName: string) => {
     if (!results || !formData || !planName.trim()) {
@@ -248,13 +248,13 @@ export default function SolarCalculatorPage() {
 
       const stored = JSON.parse(localStorage.getItem("savedPlans") || "[]") as SavedPlan[]
       const updated = [...stored, newPlan]
-      
+
       localStorage.setItem("savedPlans", JSON.stringify(updated))
-      setSavedPlans(updated.map(p => ({ 
-        ...p, 
-        createdAt: new Date(p.createdAt) 
+      setSavedPlans(updated.map(p => ({
+        ...p,
+        createdAt: new Date(p.createdAt)
       })))
-      
+
       setErrorMessage("")
     } catch (error) {
       console.error("Failed to save plan:", error)
@@ -308,10 +308,10 @@ export default function SolarCalculatorPage() {
                 <span>{user.email}</span>
               </div>
             )}
-            <Button 
-              onClick={handleLogout} 
-              variant="outline" 
-              size="sm" 
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
               className="hover:bg-red-50 hover:text-red-600"
             >
               <LogOut className="w-4 h-4 mr-1" />
@@ -408,7 +408,7 @@ export default function SolarCalculatorPage() {
                         onChange={(e) => handleInputChange("roofArea", Number(e.target.value))}
                       />
                     </div>
-                    
+
                     <div className="space-y-3">
                       <Label>屋頂覆蓋率</Label>
                       <div className="space-y-2">
@@ -490,13 +490,13 @@ export default function SolarCalculatorPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {errorMessage && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-red-600 text-sm">{errorMessage}</p>
                     </div>
                   )}
-                  
+
                   <Button
                     onClick={handleInput}
                     disabled={!isFormValid || isCalculating}
@@ -538,8 +538,8 @@ export default function SolarCalculatorPage() {
           </TabsContent>
 
           <TabsContent value="compare">
-            <PlanComparison 
-              // savedPlans={ } 
+            <PlanComparison
+              // savedPlans={ }
               // onDeletePlan={ }
               // onSelectPlan={ }
             />

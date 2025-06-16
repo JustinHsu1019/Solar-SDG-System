@@ -9,7 +9,7 @@ import { FcGoogle } from "react-icons/fc"
 export default function HomePage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  
+
   const [isSuccess, setIsSuccess] = useState(false)
 
   const mockUserInput = {
@@ -57,7 +57,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-md w-full space-y-8">
           <div className="text-center space-y-4">
             <div className="flex justify-center">
-              
+
               <img src="/logo.png" alt="logo" className="h-25 w-25" />
 
 
@@ -135,7 +135,7 @@ export default function HomePage() {
         <div className="absolute bottom-8 left-8 text-white space-y-2">
           <h2 className="text-2xl font-bold">Google Cloud/ 第三組</h2>
         </div>
-        
+
       </div>
 
       {/* 全屏載入動畫 */}
